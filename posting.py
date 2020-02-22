@@ -1,9 +1,9 @@
 class Posting:
-    def __init__(self, docid, freq, positions, fields):
+    def __init__(self, docid, freq): # add position and fields later
         self.docid = docid
         self.freq = freq    # change this to tf-idf later
-        self.positions = positions # a list of positions/ints
-        self.fields = fields
+        # self.positions = positions # a list of positions/ints
+        # self.fields = fields
         # add a way to keep track if it's a header or bolded?
 
     def get_docid(self):

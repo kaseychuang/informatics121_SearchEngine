@@ -21,7 +21,7 @@ def get_tokens(text):
     # remove all punctuation and whitespace
     words = []
     for t in all_tokens:
-        if not re.match(r"\d|[!\"\#$%&'()*”’+,\-./:';<=>?@\[\\\]^_\‘{|}~]", t):
+        if not re.match(r"\d|[!\"\#``$%&'©()*”’+,\-./:';<=>?@\[\\\]^_\‘{|}~]", t):
             words.append(t.lower())
     # de capitalize everything
 

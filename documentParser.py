@@ -1,6 +1,5 @@
 from posting import Posting
 import tokenizer
-import llist
 
 # CITE THESE???
 from bs4 import BeautifulSoup
@@ -16,16 +15,20 @@ class DocParser:
         self.markup = markup
         self.tokens = [] # becomes a set later (dunno if this will be an issue)
         self.freq = dict()
-        self.setup(self)
+        self.setup()
 
     # sets up all the member variables
     def setup(self):
         text = self.get_text(self.markup)
+
+        # get rid of one letter tokens later??
         self.tokens = tokenizer.get_tokens(text)
+
         self.freq = tokenizer.get_freq_dict(self.tokens)
 
         # remove duplicate tokens
         self.tokens = set(self.tokens)
+        # could potentially run this through a stemmer later!
 
     def get_text(self, markup):
         soup = BeautifulSoup(markup, 'lxml')
@@ -33,6 +36,12 @@ class DocParser:
             script.decompose()
         text = soup.get_text()
         return text
+
+    def get_tokens(self):
+        return self.tokens;
+
+    def get_freq_dict(self):
+        return self.freq
 
     def get_word_freq(self, word):
         return self.freq[word]
