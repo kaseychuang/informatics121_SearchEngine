@@ -1,14 +1,9 @@
-import tokenizer
+import pickle
 
+file = open("pIndex1.pkl", "rb")
+d = pickle.load(file)
+file.close()
 
-filePath = "file.txt"
-file = open(filePath, 'r')
-
-tokens = []
-for line in file:
-    tokens = tokens + tokenizer.get_tokens(line)
-
-print(tokens)
-
-freqs = tokenizer.get_freq_dict(tokens)
-print(freqs)
+for k, v in d.items():
+    #print(k,v)
+    print(k, ": ", v)
