@@ -10,6 +10,9 @@ import re
 # https://bitbucket.org/mchaput/stemming/src/default/
 from stemming.porter2 import stem
 
+from nltk.corpus import wordnet
+
+
 
 
 #stemmer = PorterStemmer()
@@ -22,7 +25,8 @@ def get_tokens(text):
     words = []
     for t in all_tokens:
         if not re.match(r"\d|[!\"\#``$%&'©()*”’+,\-./:';<=>?@\[\\\]^_\‘{|}~]", t):
-            words.append(t.lower())
+            if wordnet.synsets(t):
+                words.append(t.lower())
     # de capitalize everything
 
     return words

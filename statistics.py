@@ -14,9 +14,9 @@ class Statistics():
 
     # update file
     def update_stats(self):
-        file = open(self.filepath, 'w')
+        file = open(self.filepath, 'a')
 
-        file.write("Number of Documents: "+ str(self.num_docs))
+        file.write("\nNumber of Documents: "+ str(self.num_docs))
         file.write("\nNumber of Unique Tokens: " + str(len(self.unique_tokens)))
 
 
