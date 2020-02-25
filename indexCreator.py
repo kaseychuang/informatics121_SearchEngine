@@ -28,6 +28,7 @@ index_num = 1
 partial_index = dict()
 
 while(file_num < len(json_files)):
+#while(file_num < 10):
 
     # index this batch of files
     while (file_num < batch and file_num < len(json_files)):
@@ -41,17 +42,14 @@ while(file_num < len(json_files)):
 
             # keep count of num of docs
             stats.add_doc()
-
-
-            # for each document, gives the URL a doc ID and store this where?? (separate file?)
             id = id + 1
+
+            # add to url dictionary
             url = data["url"]
             id_urls[id] = url
 
-            # pass the doc to the document parser extract info from markup
+            # extract info from markup
             ds = documentParser.DocParser(data["content"])
-            #print(sorted(ds.get_freq_dict().items()))
-            #print(len(ds.get_freq_dict().items()))
 
             # creating the posting for each token!
             for token in ds.get_tokens():
@@ -60,12 +58,12 @@ while(file_num < len(json_files)):
                 # append posting to partial index term's postings list
                 if token not in partial_index:
                     stats.add_token(token)
-                    #partial_index[token] = [] # turn this into a linked list later!!
-                    partial_index[token] = 0
+                    partial_index[token] = [] # turn this into a linked list later!!
+                   # partial_index[token] = 0
                     # count number of unique tokens here!
 
-                #partial_index[token].append(posting)
-                partial_index[token] += 1
+                partial_index[token].append(posting)
+                #partial_index[token] += 1
 
             # close file we just opened
             file.close()
@@ -73,8 +71,7 @@ while(file_num < len(json_files)):
         file_num += 1
 
 
-    # put the posting into the hashtable or disk memory?
-    # write to disk
+    # WRITE PARTIAL INDEX TO DISK
     filename = "pIndex" + str(index_num) + ".pkl"
     file = open(filename, "wb")
     pickle.dump(partial_index, file)
@@ -89,13 +86,18 @@ while(file_num < len(json_files)):
 
     # empty the hashtable before getting next batch
     index_num += 1
-    partial_index = dict()
+    partial_index = dict()  # reset partial index
     batch = batch + 10000
-    stats.update_stats()
+    stats.update_stats()    # update statistics
 
 
-# close the file
+# close the zip file
 z.close()
+
+# WRITE URLS TO DISK (AS A JSON FILE)
+with open("urls.txt", "w") as url_file:
+    json.dump(id_urls, url_file, indent=4)
+url_file.close()
 
 # merge all the rest of the partial indexes into onedexes
 #merges them and writes back to disk into new

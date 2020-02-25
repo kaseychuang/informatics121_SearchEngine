@@ -7,27 +7,47 @@ from nltk.tokenize import regexp_tokenize
 #from nltk.stem.porter import *
 import re
 
+#https://anhaidgroup.github.io/py_stringmatching/v0.3.x/AlphanumericTokenizer.html
+from py_stringmatching import AlphanumericTokenizer
 # https://bitbucket.org/mchaput/stemming/src/default/
 from stemming.porter2 import stem
 
 from nltk.corpus import wordnet
 
-
+a_tokenizer = AlphanumericTokenizer()
 
 
 #stemmer = PorterStemmer()
 
+# ENGLISH WORDS ONLY
+
+# creates tokens and returns list of them
+# parameter is the text from the html markup (but how do we take into account the HTML tags?)
+# def get_tokens(text):
+#     all_tokens = word_tokenize(text, "english")
+#     # remove all punctuation and whitespace
+#     words = []
+#     for t in all_tokens:
+#         if not re.match(r"\d|[!\"\#``$%&'©()*”’+,\-./:';<=>?@\[\\\]^_\‘{|}~]", t):
+#             if wordnet.synsets(t):
+#                 words.append(t.lower())
+#     # de capitalize everything
+#
+#     return words
+
+
+# ALPHANUMERIC
 # creates tokens and returns list of them
 # parameter is the text from the html markup (but how do we take into account the HTML tags?)
 def get_tokens(text):
-    all_tokens = word_tokenize(text, "english")
+    all_tokens = a_tokenizer.tokenize(text)
     # remove all punctuation and whitespace
     words = []
     for t in all_tokens:
-        if not re.match(r"\d|[!\"\#``$%&'©()*”’+,\-./:';<=>?@\[\\\]^_\‘{|}~]", t):
-            if wordnet.synsets(t):
-                words.append(t.lower())
+        words.append(t.lower())
     # de capitalize everything
+
+    print(words)
 
     return words
 
