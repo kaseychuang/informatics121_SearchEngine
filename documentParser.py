@@ -11,10 +11,11 @@ from lxml import html
 
 
 class DocParser:
-    def __init__(self, markup):
+    def __init__(self, docid, markup):
         self.markup = markup
         self.tokens = [] # becomes a set later (dunno if this will be an issue)
         self.freq = dict()
+        self.id = docid
         self.setup()
 
     # sets up all the member variables
@@ -51,4 +52,17 @@ class DocParser:
 
 # calculate tf-idf thingy
     # keep track of HTML elements such as headers, bold, etc.
+
+    # returns a dictionary that is representative of a posting object
+    def get_posting(self, word):
+        posting = dict()
+        posting["id"] = self.id
+        posting["freq"] = self.get_word_freq(word)
+
+        # implement this later
+        #posting["positions"] = []
+        #posting["fields"] = []
+
+        return posting
+
 

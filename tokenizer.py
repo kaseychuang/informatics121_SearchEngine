@@ -47,7 +47,7 @@ def get_tokens(text):
         words.append(t.lower())
     # de capitalize everything
 
-    print(words)
+    #print(words)
 
     return words
 

@@ -6,32 +6,39 @@ from posting import Posting
 from statistics import Statistics
 import pickle
 import re
+import sys
+from collections import OrderedDict
 
-# Create objects
+
+#SET UP
+
+# create index files
+file_names = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b",
+                "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n",
+                "o","p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+
+for name in file_names:
+    file_name = "index/" + name + ".txt"
+    file = open(file_name, 'w')
+
 stats = Statistics("stats.txt")
 
-# test out zip file stuff
 z = zipfile.ZipFile("/Users/kaseychuang/Downloads/developer.zip", mode = 'r')
 json_files = z.namelist()
-print(len(json_files))
-
 
 id_urls = dict()
 id = 0 # this is the docIDs
-batch = 10000
-file_num = 0
-index_num = 1
+#batch = 10000
+file_num = 0 # tracks num of files we've gone through
+index_num = 1   # take this out later? (need a diff way to merge?)
+partial_index = OrderedDict()
 
-# go through documents in batches
-# for f in json_files:
-#     file = z.open(f, mode = 'r') # this is a json file
-partial_index = dict()
 
 while(file_num < len(json_files)):
 #while(file_num < 10):
 
-    # index this batch of files
-    while (file_num < batch and file_num < len(json_files)):
+    # CREATE A PARTIAL INDEX
+    while (file_num < len(json_files) ):
         print("file Num: ", file_num)
         # check if json file and not a folder
         if re.match(r".*(\.json)",  json_files[file_num]):
@@ -49,33 +56,50 @@ while(file_num < len(json_files)):
             id_urls[id] = url
 
             # extract info from markup
-            ds = documentParser.DocParser(data["content"])
+            ds = documentParser.DocParser(id, data["content"])
 
             # creating the posting for each token!
             for token in ds.get_tokens():
-                posting = Posting(id, ds.get_word_freq(token))
+                #posting = Posting(id, ds.get_word_freq(token))
 
                 # append posting to partial index term's postings list
                 if token not in partial_index:
                     stats.add_token(token)
                     partial_index[token] = [] # turn this into a linked list later!!
-                   # partial_index[token] = 0
-                    # count number of unique tokens here!
 
-                partial_index[token].append(posting)
+
+                partial_index[token].append(ds.get_posting(token))
+                #partial_index[token].append(posting)
                 #partial_index[token] += 1
+                print(sys.getsizeof(partial_index))
 
             # close file we just opened
             file.close()
 
         file_num += 1
 
+        # Check size of partial index: if too big, write to disk
+        #print(sys.getsizeof(partial_index))
+
+        # maybe 10 MB at a time instead!!!
+        if (len(partial_index) > 200000): # about 25 MB right now
+            break
+
+
 
     # WRITE PARTIAL INDEX TO DISK
-    filename = "pIndex" + str(index_num) + ".pkl"
-    file = open(filename, "wb")
-    pickle.dump(partial_index, file)
-    file.close()
+    # filename = "pIndex" + str(index_num) + ".pkl"
+    # file = open(filename, "wb")
+    # pickle.dump(partial_index, file)
+    # file.close()
+
+    print("PUTTING PARTIAL INDEX ON DISK!")
+
+    # WRITE TO JSON FILE INSTEAD
+    filename = "pIndex" + str(index_num) + ".txt"
+    with open(filename, "w") as pIndex:
+        json.dump(partial_index, pIndex, indent = 4)
+    pIndex.close()
 
 
     # merging methods here???
@@ -84,15 +108,15 @@ while(file_num < len(json_files)):
     # use pickle
 
 
-    # empty the hashtable before getting next batch
     index_num += 1
-    partial_index = dict()  # reset partial index
-    batch = batch + 10000
+    partial_index.clear()  # reset partial index
+    #batch = batch + 10000
     stats.update_stats()    # update statistics
 
 
 # close the zip file
 z.close()
+stats.update_stats()
 
 # WRITE URLS TO DISK (AS A JSON FILE)
 with open("urls.txt", "w") as url_file:
