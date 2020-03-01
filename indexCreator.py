@@ -20,6 +20,8 @@ file_names = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b",
 for name in file_names:
     file_name = "index/" + name + ".txt"
     file = open(file_name, 'w')
+    od = OrderedDict()
+    json.dump(od, file, indent = 3)
 
 stats = Statistics("stats.txt")
 
@@ -38,11 +40,11 @@ while(file_num < len(json_files)):
 #while(file_num < 10):
 
     # CREATE A PARTIAL INDEX
-    while (file_num < len(json_files) ):
+    while (file_num < len(json_files)):
         print("file Num: ", file_num)
         # check if json file and not a folder
         if re.match(r".*(\.json)",  json_files[file_num]):
-            file = z.open(json_files[file_num], mode = 'r')
+            file = z.open(json_files[file_num], mode='r')
             #print("FILE: ", file)
             data = json.load(file)
             #print("URL: ", data["url"])
@@ -69,34 +71,21 @@ while(file_num < len(json_files)):
 
 
                 partial_index[token].append(ds.get_posting(token))
-                #partial_index[token].append(posting)
-                #partial_index[token] += 1
-                print(sys.getsizeof(partial_index))
 
             # close file we just opened
             file.close()
 
         file_num += 1
 
-        # Check size of partial index: if too big, write to disk
-        #print(sys.getsizeof(partial_index))
 
         # maybe 10 MB at a time instead!!!
         if (len(partial_index) > 200000): # about 25 MB right now
             break
 
-
-
-    # WRITE PARTIAL INDEX TO DISK
-    # filename = "pIndex" + str(index_num) + ".pkl"
-    # file = open(filename, "wb")
-    # pickle.dump(partial_index, file)
-    # file.close()
-
     print("PUTTING PARTIAL INDEX ON DISK!")
 
     # WRITE TO JSON FILE INSTEAD
-    filename = "pIndex" + str(index_num) + ".txt"
+    filename = "partial_indexes/pIndex" + str(index_num) + ".txt"
     with open(filename, "w") as pIndex:
         json.dump(partial_index, pIndex, indent = 4)
     pIndex.close()
@@ -106,7 +95,6 @@ while(file_num < len(json_files)):
     # create merge method here
     # takes two file names, which have partial in file?? Or just the first file
     # use pickle
-
 
     index_num += 1
     partial_index.clear()  # reset partial index
