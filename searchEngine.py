@@ -39,6 +39,9 @@ class SearchEngine:
 
         # return the doc ids of the results
         found_docs = [] # list of doc ids
+
+        # grab urls using the doc ids
+        # USE SEEK METHOD TO MAKE IT FASTER?? BECAUSE WE KNOW THE FORMAT
         return found_docs
 
 

@@ -8,6 +8,7 @@ import pickle
 import re
 import sys
 from collections import OrderedDict
+import indexMerger as im
 
 
 #SET UP
@@ -20,8 +21,8 @@ file_names = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b",
 for name in file_names:
     file_name = "index/" + name + ".txt"
     file = open(file_name, 'w')
-    od = OrderedDict()
-    json.dump(od, file, indent = 3)
+    json.dump(dict(), file, indent = 3)
+    file.close()
 
 stats = Statistics("stats.txt")
 
@@ -30,14 +31,13 @@ json_files = z.namelist()
 
 id_urls = dict()
 id = 0 # this is the docIDs
-#batch = 10000
 file_num = 0 # tracks num of files we've gone through
 index_num = 1   # take this out later? (need a diff way to merge?)
 partial_index = OrderedDict()
 
+# CREATE PARTIAL INDEXES!
 
 while(file_num < len(json_files)):
-#while(file_num < 10):
 
     # CREATE A PARTIAL INDEX
     while (file_num < len(json_files)):
@@ -45,9 +45,7 @@ while(file_num < len(json_files)):
         # check if json file and not a folder
         if re.match(r".*(\.json)",  json_files[file_num]):
             file = z.open(json_files[file_num], mode='r')
-            #print("FILE: ", file)
             data = json.load(file)
-            #print("URL: ", data["url"])
 
             # keep count of num of docs
             stats.add_doc()
@@ -62,7 +60,6 @@ while(file_num < len(json_files)):
 
             # creating the posting for each token!
             for token in ds.get_tokens():
-                #posting = Posting(id, ds.get_word_freq(token))
 
                 # append posting to partial index term's postings list
                 if token not in partial_index:
@@ -78,11 +75,9 @@ while(file_num < len(json_files)):
         file_num += 1
 
 
-        # maybe 10 MB at a time instead!!!
         if (len(partial_index) > 200000): # about 25 MB right now
             break
 
-    print("PUTTING PARTIAL INDEX ON DISK!")
 
     # WRITE TO JSON FILE INSTEAD
     filename = "partial_indexes/pIndex" + str(index_num) + ".txt"
@@ -90,15 +85,8 @@ while(file_num < len(json_files)):
         json.dump(partial_index, pIndex, indent = 4)
     pIndex.close()
 
-
-    # merging methods here???
-    # create merge method here
-    # takes two file names, which have partial in file?? Or just the first file
-    # use pickle
-
     index_num += 1
     partial_index.clear()  # reset partial index
-    #batch = batch + 10000
     stats.update_stats()    # update statistics
 
 
@@ -111,5 +99,7 @@ with open("urls.txt", "w") as url_file:
     json.dump(id_urls, url_file, indent=4)
 url_file.close()
 
-# merge all the rest of the partial indexes into onedexes
-#merges them and writes back to disk into new
+# MERGE PARTIAL INDEXES INTO SINGLE ONE
+im.merge_partials("partial_indexes")
+
+# ADD TF-IDF! (add that into the IndexMerger module later

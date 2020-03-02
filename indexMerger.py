@@ -3,6 +3,7 @@ from collections import OrderedDict
 import os
 # module for merging partial indexes in json format
 
+
 def merge_partials(folder):
     # open the folder, like we did before
     for filename in os.listdir(folder):
@@ -20,13 +21,67 @@ def merge_partials(folder):
         file.close()
 
 
-    # while we still have files in the folder
+# assume that the partial index is already open and loaded as a dictionary
+def write_pindex_to_disk(pIndex, indexFolderPath):
+    # open index folder path file
+    pathname = indexFolderPath + "/a.txt"
+    f = open(pathname, mode = 'r+')    # not sure if this is read or write
+    current_index = json.load(f)
 
-    # open two at a time and merge them
-    # write to a disk
+    terms = sorted(pIndex.keys())
+    for t in terms:
+        # check if appropriate letter index open
+        first_char = t[0]
 
-    # then if there is only one file left, then just merge that one
-    # into the disk
+        # check if appropriate file is open
+        pathname = "index/" + first_char + ".txt"
+        if not f.name == pathname:
+            # update and close current index file
+            write_and_close(f, current_index)
+
+            # open new index file and load index
+            f = open(pathname, 'r+')
+            current_index = json.load(f)
+
+        # add partial indexes' postings to the index
+        if t in current_index.keys():
+            current_index[t] = merge_postings(current_index[t], pIndex[t])
+        else:
+            current_index[t] = pIndex[t]
+
+    # write last term and close file
+    write_and_close(f, current_index)
+
+
+# clears the file for the updated index
+def write_and_close(opened_file, index):
+    opened_file.seek(0)
+    opened_file.truncate()
+    json.dump(index, opened_file, indent=3)
+    opened_file.close()
+
+
+def merge_postings(p1, p2):
+    # check which one has lower doc numbers
+    docNum1 = p1[0]["id"]
+    docNum2 = p2[0]["id"]
+
+    if docNum1 > docNum2: # will never be equal
+        return p2 + p1
+    else:
+        return p1 + p2
+
+
+def add_tf_idf(index):
+    # go through each letter/number file
+
+    # calculate the tf_idf for each
+
+    # add that to each postings in the postings list
+
+    return True
+
+# NOT USED BUT COULD BE USEFUL IN THE FUTURE
 
 # returns a merged index (from  2 partials) that I can write to disk
 def binary_merge(pIndex1, pIndex2):
@@ -87,73 +142,4 @@ def binary_merge(pIndex1, pIndex2):
 
     return merged_index
 
-
-        # write to output file??/
-        # check if appropriate index letter file open already
-        # if not, open it and close the last one?
-
-# assume that the partial index is already open and loaded as a dictionary
-def write_pindex_to_disk(pIndex, indexFolderPath):
-    # open index folder path file
-    pathname = indexFolderPath + "/a.txt"
-    f = open(pathname, mode = 'r+')    # not sure if this is read or write
-
-    # variable to hold the current dictionary that is opened
-    # (not sure if it's sorted)
-    current_index = json.load(f)
-
-    terms = sorted(pIndex.keys())
-    for t in terms:
-        # check if appropriate letter index open
-        first_char = t[0]
-
-        # check if appropriate file is open
-        pathname = "index/" + first_char + ".txt"
-        if not f.name == pathname:
-            # close current index file
-            # dump our current dictionary
-            write_and_close(f, current_index)
-
-            # open new index file and load index
-            f = open(pathname, 'r+')
-            current_index = json.load(f)
-
-        # add partial indexes' postings to the index
-        # check if t is in the index file already
-        if t in current_index.keys():
-            current_index[t] = merge_postings(current_index[t], pIndex[t])
-        else:
-            current_index[t] = pIndex[t]
-
-    # write last term and close file
-    write_and_close(f, current_index)
-
-
-# clears the file for the updated index
-def write_and_close(opened_file, index):
-    opened_file.seek(0)
-    opened_file.truncate()
-    json.dump(index, opened_file, indent=3)
-    opened_file.close()
-
-
-def merge_postings(p1, p2):
-    # check which one has lower doc numbers
-    docNum1 = p1[0]["id"]
-    docNum2 = p2[0]["id"]
-
-    if docNum1 > docNum2: # will never be equal
-        return p2 + p1
-    else:
-        return p1 + p2
-
-
-def add_tf_idf(index):
-    # go through each letter/number file
-
-    # calculate the tf_idf for each
-
-    # add that to each postings in the postings list
-
-    return True
 
