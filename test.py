@@ -1,3 +1,16 @@
+# test search engine methods
+
+from searchEngine import SearchEngine
+se = SearchEngine("index")
+
+
+print(se.search("cristina lopes", 5))
+print(se.search("machine learning", 5))
+print(se.search("ACM", 5))
+print(se.search("master of software engineering", 5))
+
+
+
 # import pickle
 #
 # file = open("pIndex1.pkl", "rb")
@@ -28,7 +41,7 @@
 
 # stuck on file 16991??
 
-# from collections import OrderedDict
+from collections import OrderedDict
 # import json
 #
 # file_names = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b",
@@ -38,24 +51,63 @@
 # for name in file_names:
 #     file_name = "index/" + name + ".txt"
 #     file = open(file_name, 'w')
-#
-# od = OrderedDict()
-# od["hi"] = 3
-#
-# with open("test.txt", "w") as test_file:
-#     json.dump(od, test_file)
-# test_file.close()
+#     json.dump(dict(), file, indent = 3)
+#     file.close()
 
+
+
+import indexMerger
 import json
+from collections import OrderedDict
+# import os
+#
+# #indexMerger.merge_partials("partial_indexes")
+# for filename in os.listdir("partial_indexes"):
+#     print(filename)
 
-# open a partial index file
-partial_index = json.load("pIndex1.txt")
 
+# merged_index = indexMerger.binary_merge("pIndex1.txt", "pIndex2.txt")
+#
+# with open("merged.txt", "w") as m_index:
+#     json.dump(merged_index, m_index, indent = 3)
+# m_index.close()
+
+#file = open("index/a.txt", mode = 'r')
+
+#print(file.name)
+# index = json.load(file)
+# indexMerger.write_pindex_to_disk(index)
+
+#
+# l1 = ["hi", "there", "friend"]
+# l2 = ["apple", "cherry"]
+#
+# print(l1 + l2)
+# print(l2 + l1)
+
+# file = open("test.txt", 'r')
+# p_index = json.load(file)
+# indexMerger.write_pindex_to_disk(p_index, "index")
+
+# doesn't get to the last term??
+
+# I'm double writing to the json file?? How do I replace everything?
+# do I have to open it as w+
 
 # iterate through each entry
 # add it to the appropriate letter index
 
+# book keeping, index the terms and where their position is in the file??
+# can keep it in memory, or on disk so you can check it yourself
 
+# can try implementing seek operations with json files
+# stick with letter indexes, but can create bookkeeping index
+    # make it faster to grab stuff later??
 
+# merge at the end or as we go?
+
+# could open all partial indexes simultaneously and read from each
+# DON'T LOAD THEM INTO MEMORY THOUGH!
+# by parsing the format of the json, I should be able to grab terms and their postings
 
 
