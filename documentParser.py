@@ -1,4 +1,3 @@
-from posting import Posting
 import tokenizer
 
 # CITE THESE???

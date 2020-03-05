@@ -2,11 +2,8 @@
 import zipfile
 import json
 import documentParser
-from posting import Posting
 from statistics import Statistics
-import pickle
 import re
-import sys
 from collections import OrderedDict
 import indexMerger as im
 
@@ -79,7 +76,6 @@ while(file_num < len(json_files)):
             break
 
 
-    # WRITE TO JSON FILE INSTEAD
     filename = "partial_indexes/pIndex" + str(index_num) + ".txt"
     with open(filename, "w") as pIndex:
         json.dump(partial_index, pIndex, indent = 4)
@@ -101,5 +97,7 @@ url_file.close()
 
 # MERGE PARTIAL INDEXES INTO SINGLE ONE
 im.merge_partials("partial_indexes")
+
+# calculate the tf-idf values?
 
 # ADD TF-IDF! (add that into the IndexMerger module later
