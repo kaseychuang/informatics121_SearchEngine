@@ -8,13 +8,14 @@ from collections import OrderedDict
 import indexMerger as im
 
 
-#SET UP
+# -------------------------
+# SET UP
+# -------------------------
 
 # create index files
 file_names = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b",
                 "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n",
                 "o","p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
-
 for name in file_names:
     file_name = "index/" + name + ".txt"
     file = open(file_name, 'w')
@@ -27,52 +28,46 @@ z = zipfile.ZipFile("/Users/kaseychuang/Downloads/developer.zip", mode = 'r')
 json_files = z.namelist()
 
 id_urls = dict()
-id = 0 # this is the docIDs
-file_num = 0 # tracks num of files we've gone through
+id = 0
+file_num = 0
 index_num = 1   # take this out later? (need a diff way to merge?)
 partial_index = OrderedDict()
 
+# -------------------------
 # CREATE PARTIAL INDEXES!
+# -------------------------
 
-while(file_num < len(json_files)):
+while file_num < len(json_files):
 
     # CREATE A PARTIAL INDEX
-    while (file_num < len(json_files)):
-        print("file Num: ", file_num)
+    while file_num < len(json_files):
+        print("file Num: ", file_num) # FOR DEBUGGING
+
         # check if json file and not a folder
         if re.match(r".*(\.json)",  json_files[file_num]):
             file = z.open(json_files[file_num], mode='r')
             data = json.load(file)
 
-            # keep count of num of docs
+            # keep count of num of docs, add url to books
             stats.add_doc()
             id = id + 1
-
-            # add to url dictionary
             url = data["url"]
             id_urls[id] = url
 
             # extract info from markup
             ds = documentParser.DocParser(id, data["content"])
 
-            # creating the posting for each token!
+            # creating the posting for each token
             for token in ds.get_tokens():
-
-                # append posting to partial index term's postings list
                 if token not in partial_index:
                     stats.add_token(token)
                     partial_index[token] = [] # turn this into a linked list later!!
-
-
                 partial_index[token].append(ds.get_posting(token))
 
-            # close file we just opened
             file.close()
 
         file_num += 1
-
-
-        if (len(partial_index) > 200000): # about 25 MB right now
+        if len(partial_index) > 200000: # about 25 MB right now
             break
 
 
@@ -86,7 +81,6 @@ while(file_num < len(json_files)):
     stats.update_stats()    # update statistics
 
 
-# close the zip file
 z.close()
 stats.update_stats()
 
@@ -95,9 +89,13 @@ with open("urls.txt", "w") as url_file:
     json.dump(id_urls, url_file, indent=4)
 url_file.close()
 
-# MERGE PARTIAL INDEXES INTO SINGLE ONE
+
+# -------------------------
+# CREATE INDEX BY MERGING
+# -------------------------
+
+# Create index
 im.merge_partials("partial_indexes")
+im.add_tf_idf("index", stats.get_num_docs())
+# add calc hubs/page rank here?
 
-# calculate the tf-idf values?
-
-# ADD TF-IDF! (add that into the IndexMerger module later

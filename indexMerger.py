@@ -1,6 +1,7 @@
 import json
 from collections import OrderedDict
 import os
+import math
 # module for merging partial indexes in json format
 
 
@@ -72,14 +73,32 @@ def merge_postings(p1, p2):
         return p1 + p2
 
 
-def add_tf_idf(index):
-    # go through each letter/number file
+def add_tf_idf(index_folder, collection_size):
+    # open the folder, like we did before
+    for filename in os.listdir(index_folder):
+        # check if it's a txt file
+        # open the file
+        path = index_folder + "/" + filename
 
-    # calculate the tf_idf for each
+        print(path)
+        file = open(path, 'r+')
+        print(filename)
 
-    # add that to each postings in the postings list
+        index = json.load(file)
 
-    return True
+        for term, postings in index.items(): # this gets list of postings
+            df = len(index[term]) # might have to change this if we change to a set
+            idf = math.log(collection_size / df, 10)
+            print("Term: ", term)
+
+            for p in postings:
+                print(p)
+                tf = 1 + math.log(p["freq"], 10)
+                p["tf-idf"] = tf * idf
+
+        write_and_close(file, index)
+        index.clear()
+
 
 # NOT USED BUT COULD BE USEFUL IN THE FUTURE
 
@@ -141,5 +160,4 @@ def binary_merge(pIndex1, pIndex2):
             pointer2 += 1
 
     return merged_index
-
 

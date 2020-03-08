@@ -12,6 +12,9 @@ class Statistics():
     def add_doc(self):
         self.num_docs += 1
 
+    def get_num_docs(self):
+        return self.num_docs
+
     # update file
     def update_stats(self):
         file = open(self.filepath, 'a')

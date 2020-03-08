@@ -46,6 +46,10 @@ class DocParser:
     def get_word_freq(self, word):
         return self.freq[word]
 
+    # implement this later
+    def calc_authority(self):
+        return True
+
 # takes a document
 # uses the HTML
 
@@ -57,6 +61,7 @@ class DocParser:
         posting = dict()
         posting["id"] = self.id
         posting["freq"] = self.get_word_freq(word)
+        posting["tf-idf"] = 0; # will be calculated later
 
         # implement this later
         #posting["positions"] = []
