@@ -48,46 +48,84 @@ class SearchEngine:
         index.clear()
         return postings
 
-    # returns THE POSTINGS OF all documents that have all the query terms
-    # returns a dictionary <docID, list of postings>
-    # terms not labeled, but doesn't matter (len(postings) = num query terms)
+    # returns a list of tuples with (docID, [(term, posting)])
+    # value is a list of (term, posting) tuples
     def find_matching_docs(self, query_term_list):
+        # key = docID, value = list of (term, posting) tuples
+        matches = dict()
 
-        # if just one query
+        # dictionary for term: postings pairs since we are reordering?
+        term_postings = dict()
+        for term in query_term_list:
+            term_postings[term] = self.get_postings(term)
+
+        # sort postings
+        terms = [term for term, postings in sorted(term_postings.items(), key = lambda x: len(x[1]))]
+        print(terms)
+
+        # add initial postings inside
+        first_term = terms[0]
+        postings = self.get_postings(first_term)
+        for posting in postings:
+            pair = (first_term, posting)
+            matches[posting["id"]] = [pair]
+
+        # check if only term in the query
         if len(query_term_list) == 1:
-            postings = self.get_postings(query_term_list[0])
-            return {p["id"]: [p] for p in postings}
-            #return [p["id"] for p in postings]
+            return matches
 
-        # get each postings list of each term
-        posting_lists = [self.get_postings(t) for t in query_term_list]
+        # go through list of terms and their postings in terms of the sorted list
+        for term in terms[1:]:
+            postings = term_postings[term]
+            for posting in postings:
+                pair = (term, posting)
+                if posting["id"] in matches.keys():
+                    matches[posting["id"]].append(pair)
 
-        # sort the queries by the length of their postings list
-        posting_lists = sorted(posting_lists, key = lambda x: len(x))
+        print("MATCHES: ", matches)
 
-        query_num = 1
+        return matches
 
-        # grab doc IDs in the first postings list
-        matching_docs = [p["id"] for p in posting_lists[0]]
-
-        while query_num <= len(posting_lists) - 1:
-            # merge results with next posting
-            term_docs = [p["id"] for p in posting_lists[query_num]]
-            matching_docs = self.merge_postings(matching_docs, term_docs)
-            query_num += 1
-
-        # results is the list of doc ids with all queries
-        # now build the list with docID and the associated postings with it
-        # MAKE THIS MORE EFFICIENT LATER!
-        results = dict()
-        for doc_id in matching_docs:
-            results[doc_id] = []
-            for postings in posting_lists:
-                for p in postings:
-                    if p["id"] == doc_id:
-                        results[doc_id].append(p)
-
-        return results
+    # # returns THE POSTINGS OF all documents that have all the query terms
+    # # returns a dictionary <docID, list of postings>
+    # # terms not labeled, but doesn't matter (len(postings) = num query terms)
+    # def find_matching_docs(self, query_term_list):
+    #
+    #     # if just one query
+    #     if len(query_term_list) == 1:
+    #         postings = self.get_postings(query_term_list[0])
+    #         return {p["id"]: [p] for p in postings}
+    #         #return [p["id"] for p in postings]
+    #
+    #     # get each postings list of each term
+    #     posting_lists = [self.get_postings(t) for t in query_term_list]
+    #
+    #     # sort the queries by the length of their postings list
+    #     posting_lists = sorted(posting_lists, key = lambda x: len(x))
+    #
+    #     query_num = 1
+    #
+    #     # grab doc IDs in the first postings list
+    #     matching_docs = [p["id"] for p in posting_lists[0]]
+    #
+    #     while query_num <= len(posting_lists) - 1:
+    #         # merge results with next posting
+    #         term_docs = [p["id"] for p in posting_lists[query_num]]
+    #         matching_docs = self.merge_postings(matching_docs, term_docs)
+    #         query_num += 1
+    #
+    #     # results is the list of doc ids with all queries
+    #     # now build the list with docID and the associated postings with it
+    #     # MAKE THIS MORE EFFICIENT LATER!
+    #     results = dict()
+    #     for doc_id in matching_docs:
+    #         results[doc_id] = []
+    #         for postings in posting_lists:
+    #             for p in postings:
+    #                 if p["id"] == doc_id:
+    #                     results[doc_id].append(p)
+    #
+    #     return results
 
 
     # takes two lists of doc ids and returns a list of all matching docs
@@ -122,5 +160,23 @@ class SearchEngine:
             urls.append(url)
 
         return urls
+
+        # file = ope`n("urls.txt", "r")
+        # urls = []
+        # for id in doc_ids:
+        #   # print("ID: ", id)
+        #     # file.seek(id + 1)
+        #     file.seek(100)
+        #     line = file.readline()
+        #
+        #     print(line)
+        #
+        #     url = line.split()[1][1:-1];
+        #    # print(url)
+        #     urls.append(url)
+        #
+        # file.close()
+        #
+        # return urls
 
 
