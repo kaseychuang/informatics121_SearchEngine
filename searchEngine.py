@@ -3,29 +3,38 @@
 import json
 import re
 import ranker
+from stemming.porter2 import stem
+import time
+
 
 class SearchEngine:
     def __init__(self, index_folder):
         self.index_folder = index_folder
 
+
     # method that gets called to get search results!
     def search(self, query, num_results):
-        # create query list
+        # create query list, filter out common query words and duplicates
         query_list = query.split()
+        query_list = list(set(query_list))
 
         i = 0
         while i < len(query_list):
-            query_list[i] = query_list[i].lower()
+            query_list[i] = stem(query_list[i].lower())
             i += 1
 
+        start_time = time.time()
         # returns dictionary of documents and appropriate term postings
         found_docs = self.find_matching_docs(query_list)
+
+        print("Retrival Time: ", (time.time() - start_time))
 
         # RANK DOCUMENTS
         results = ranker.rank_docs(query_list, found_docs)
 
         # return urls of results
         urls = self.get_urls(results)
+        print(results[:num_results])
 
         return urls[:num_results]
 
@@ -33,6 +42,17 @@ class SearchEngine:
     # -------------------------
     # RETRIVAL METHODS
     # -------------------------
+
+    # def filter_query(self, query_term_list):
+    #     # get rid of duplicates
+    #     if len(query_term_list) > 1:
+    #         filtered_queries = set()
+    #         for term in query_term_list:
+    #
+    #     else:
+    #         return query_term_list
+
+
 
     # gets the appropriate postings for the term
     def get_postings(self, term):
@@ -82,50 +102,9 @@ class SearchEngine:
                 if posting["id"] in matches.keys():
                     matches[posting["id"]].append(pair)
 
-        print("MATCHES: ", matches)
+    #print("MATCHES: ", matches)
 
         return matches
-
-    # # returns THE POSTINGS OF all documents that have all the query terms
-    # # returns a dictionary <docID, list of postings>
-    # # terms not labeled, but doesn't matter (len(postings) = num query terms)
-    # def find_matching_docs(self, query_term_list):
-    #
-    #     # if just one query
-    #     if len(query_term_list) == 1:
-    #         postings = self.get_postings(query_term_list[0])
-    #         return {p["id"]: [p] for p in postings}
-    #         #return [p["id"] for p in postings]
-    #
-    #     # get each postings list of each term
-    #     posting_lists = [self.get_postings(t) for t in query_term_list]
-    #
-    #     # sort the queries by the length of their postings list
-    #     posting_lists = sorted(posting_lists, key = lambda x: len(x))
-    #
-    #     query_num = 1
-    #
-    #     # grab doc IDs in the first postings list
-    #     matching_docs = [p["id"] for p in posting_lists[0]]
-    #
-    #     while query_num <= len(posting_lists) - 1:
-    #         # merge results with next posting
-    #         term_docs = [p["id"] for p in posting_lists[query_num]]
-    #         matching_docs = self.merge_postings(matching_docs, term_docs)
-    #         query_num += 1
-    #
-    #     # results is the list of doc ids with all queries
-    #     # now build the list with docID and the associated postings with it
-    #     # MAKE THIS MORE EFFICIENT LATER!
-    #     results = dict()
-    #     for doc_id in matching_docs:
-    #         results[doc_id] = []
-    #         for postings in posting_lists:
-    #             for p in postings:
-    #                 if p["id"] == doc_id:
-    #                     results[doc_id].append(p)
-    #
-    #     return results
 
 
     # takes two lists of doc ids and returns a list of all matching docs
@@ -160,6 +139,9 @@ class SearchEngine:
             urls.append(url)
 
         return urls
+
+    def get_collection_size(self):
+        return self.collecti
 
         # file = ope`n("urls.txt", "r")
         # urls = []

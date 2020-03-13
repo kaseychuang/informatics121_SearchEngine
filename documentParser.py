@@ -61,7 +61,7 @@ class DocParser:
         posting = dict()
         posting["id"] = self.id
         posting["freq"] = self.get_word_freq(word)
-        posting["tf-idf"] = 0; # will be calculated later
+       # posting["tf-idf"] = 0; # will be calculated later
 
         # implement this later
         #posting["positions"] = []

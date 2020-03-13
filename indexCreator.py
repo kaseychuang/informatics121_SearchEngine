@@ -96,6 +96,15 @@ url_file.close()
 
 # Create index
 im.merge_partials("partial_indexes")
-im.add_tf_idf("index", stats.get_num_docs())
+#im.add_tf_idf("index", stats.get_num_docs())
+
+# Create idf dictionary for searching later!
+# write that dictionary to a file
+im.create_idf_dict("index", stats.get_num_docs())
+
+
+
+
+
 # add calc hubs/page rank here?
 

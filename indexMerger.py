@@ -1,6 +1,7 @@
 import json
 from collections import OrderedDict
 import os
+import re
 import math
 # module for merging partial indexes in json format
 
@@ -9,17 +10,18 @@ def merge_partials(folder):
     # open the folder, like we did before
     for filename in os.listdir(folder):
         # open the file
-        path = folder + "/" + filename
-        file = open(path, 'r')
-        print(filename)
+        if filename[0:5] == "pIndex":
+            path = folder + "/" + filename
+            file = open(path, 'r')
+            print(filename)
 
-        p_index = json.load(file)
+            p_index = json.load(file)
 
-        write_pindex_to_disk(p_index, "index")
+            write_pindex_to_disk(p_index, "index")
 
-        p_index.clear()
+            p_index.clear()
 
-        file.close()
+            file.close()
 
 
 # assume that the partial index is already open and loaded as a dictionary
@@ -98,6 +100,38 @@ def add_tf_idf(index_folder, collection_size):
 
         write_and_close(file, index)
         index.clear()
+
+
+# creates file to store idf dictionary
+def create_idf_dict(index_folder, collection_size):
+    idf_dict = dict()
+
+    for filename in os.listdir(index_folder):
+
+        if re.match("^.*\.txt$", filename):
+            path = index_folder + "/" + filename
+
+            print(path)
+            file = open(path, 'r+')
+            print(filename)
+
+            index = json.load(file)
+
+            for term, postings in index.items():
+                df = len(index[term])
+                idf = math.log(collection_size / df, 10)
+                idf_dict[term] = idf
+
+    with open("idfs.txt", "w") as idf_file:
+        json.dump(idf_dict, idf_file, indent=4)
+    idf_file.close()
+
+
+
+def get_indexed_index():
+    return True
+
+
 
 
 # NOT USED BUT COULD BE USEFUL IN THE FUTURE

@@ -1,5 +1,6 @@
 # Tokenizer
 # use NLTK (tokenizing and stopwords)
+from nltk.corpus import wordnet
 
 # https://www.nltk.org/
 from nltk.stem.porter import *
@@ -21,7 +22,14 @@ def get_tokens(text):
     words = []
     for t in all_tokens:
         # stem and decapitalize
-        words.append(stem(t.lower()))
+        # filter out numbers longer than 10
+        # filter out non-english words that are longer than 15 characters
+        token = stem(t.lower())
+        if token.isnumeric() and len(token) < 10:
+            words.append(token)
+        elif len(token) < 15 or wordnet.synsets(token):
+            words.append(token)
+
     return words
 
 
