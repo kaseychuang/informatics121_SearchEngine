@@ -102,6 +102,10 @@ im.merge_partials("partial_indexes")
 # write that dictionary to a file
 im.create_idf_dict("index", stats.get_num_docs())
 
+# add tfidfs
+im.add_tf_idf("index", stats.get_num_docs())
+
+
 
 
 

@@ -20,7 +20,6 @@ def rank_docs(query_list, docs_dict):
 # keys = docId
 # values = list of (term, posting) tuples
 def get_scores(query_term_list, doc_dict):
-    print("starting scoring")
     idf_file = open("idfs.txt", "r")
     idf_dict = json.load(idf_file)
     # set up score tracker

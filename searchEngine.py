@@ -5,6 +5,7 @@ import re
 import ranker
 from stemming.porter2 import stem
 import time
+from nltk.corpus import stopwords
 
 
 class SearchEngine:
@@ -14,23 +15,27 @@ class SearchEngine:
 
     # method that gets called to get search results!
     def search(self, query, num_results):
+        start_time = time.time()
+
         # create query list, filter out common query words and duplicates
         query_list = query.split()
-        query_list = list(set(query_list))
+        query_list = self.filter_query(query_list)
 
         i = 0
         while i < len(query_list):
             query_list[i] = stem(query_list[i].lower())
             i += 1
 
-        start_time = time.time()
         # returns dictionary of documents and appropriate term postings
         found_docs = self.find_matching_docs(query_list)
 
-        print("Retrival Time: ", (time.time() - start_time))
+        retrieval_time = time.time()
+        print("Retrival Time: ", retrieval_time - start_time)
 
         # RANK DOCUMENTS
         results = ranker.rank_docs(query_list, found_docs)
+
+        print("Ranking Time: ", time.time() - retrieval_time)
 
         # return urls of results
         urls = self.get_urls(results)
@@ -43,14 +48,21 @@ class SearchEngine:
     # RETRIVAL METHODS
     # -------------------------
 
-    # def filter_query(self, query_term_list):
-    #     # get rid of duplicates
-    #     if len(query_term_list) > 1:
-    #         filtered_queries = set()
-    #         for term in query_term_list:
-    #
-    #     else:
-    #         return query_term_list
+    def filter_query(self, query_term_list):
+        stop_words = set(stopwords.words('english'))
+        # get rid of duplicates
+        if len(query_term_list) > 1:
+            filtered_queries = set()
+            for term in query_term_list:
+                if term not in stop_words:
+                    filtered_queries.add(term)
+            if len(filtered_queries) == 0:
+                return query_term_list
+            else:
+                return list(filtered_queries)
+
+        else:
+            return query_term_list
 
 
 

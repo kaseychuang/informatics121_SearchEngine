@@ -127,8 +127,43 @@ def create_idf_dict(index_folder, collection_size):
     idf_file.close()
 
 
+# returns a dictionary that indexes the index
+# TEST THIS ON A SMALL SAMPLE!
+def create_indexed_index(index_folder):
+    index_dict = dict()
 
-def get_indexed_index():
+    # have to open all the partial indexes one by one
+    # DO THIS AT THE SAME TIME AS WHEN I MAKE THE IDF DICTIONARY!!! TO MAKE MORE EFFICIENT??
+    for filename in os.listdir(index_folder):
+        index_dict[filename] = dict()
+
+        if re.match("^.*\.txt$", filename):
+            path = index_folder + "/" + filename
+            print(path)
+            file = open(path, 'r+')
+            print(filename)
+            index = json.load(file)
+            position = 0
+
+            for term, postings in index.items():
+                num_postings = len(postings)
+                # calculate offsets!
+
+                # DO LATER!
+
+    return index_dict
+
+
+
+
+    # key = index file name
+    # value = dictionary<term, character num>
+
+    # keep track of what character num we're on! (resets each file)
+
+
+
+
     return True
 
 
