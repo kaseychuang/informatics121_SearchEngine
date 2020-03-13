@@ -32,6 +32,7 @@ id = 0
 file_num = 0
 index_num = 1   # take this out later? (need a diff way to merge?)
 partial_index = OrderedDict()
+simhashes = {} # use for detecting duplicate pages
 
 # -------------------------
 # CREATE PARTIAL INDEXES!
@@ -49,7 +50,6 @@ while file_num < len(json_files):
             data = json.load(file)
 
             # keep count of num of docs, add url to books
-            stats.add_doc()
             id = id + 1
             url = data["url"]
             id_urls[id] = url
@@ -57,12 +57,18 @@ while file_num < len(json_files):
             # extract info from markup
             ds = documentParser.DocParser(id, data["content"])
 
-            # creating the posting for each token
-            for token in ds.get_tokens():
-                if token not in partial_index:
-                    stats.add_token(token)
-                    partial_index[token] = [] # turn this into a linked list later!!
-                partial_index[token].append(ds.get_posting(token))
+            # check if don't already have a similar webpage
+            if ds.get_simhash() not in simhashes.values():
+                # add simhash
+                simhashes[id] = ds.get_simhash()
+                stats.add_doc() # add doc to statistics
+
+                # add document's terms into index
+                for token in ds.get_tokens():
+                    if token not in partial_index:
+                        stats.add_token(token)
+                        partial_index[token] = [] # turn this into a linked list later!!
+                    partial_index[token].append(ds.get_posting(token))
 
             file.close()
 

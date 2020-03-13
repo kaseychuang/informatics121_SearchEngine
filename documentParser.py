@@ -1,12 +1,10 @@
 import tokenizer
 
-# CITE THESE???
+# https://www.crummy.com/software/BeautifulSoup/bs4/doc/#
 from bs4 import BeautifulSoup
-from lxml import html
 
-# LATER IMPLEMENT STORING HTML TAGS AND WHICH ARE MORE IMPORTANT
-# USE TO CALCULATE IMPORTANCE OF EACH WORD
-# MAYBE ADD POSITIONING IN HERE LATER??
+# bhttps://leons.im/posts/a-python-implementation-of-simhash-algorithm/
+from simhash import Simhash
 
 
 class DocParser:
@@ -18,6 +16,7 @@ class DocParser:
         self.soup = ""
         self.text = ""
         self.html_dict = dict()
+        self.simhash = 0
         self.setup()
 
     # sets up all the member variables
@@ -35,6 +34,10 @@ class DocParser:
 
         self.html_dict = self.get_html_elements()
 
+        # calculate simhash
+        self.simhash = Simhash(self.text).value
+        print("SIMHASH: ", self.simhash)
+
         # remove duplicate tokens
         self.tokens = set(self.tokens)
         # could potentially run this through a stemmer later!
@@ -47,6 +50,9 @@ class DocParser:
 
     def get_word_freq(self, word):
         return self.freq[word]
+
+    def get_simhash(self):
+        return self.simhash
 
     # implement this later
     def calc_authority(self):
