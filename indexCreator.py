@@ -33,6 +33,7 @@ file_num = 0
 index_num = 1   # take this out later? (need a diff way to merge?)
 partial_index = OrderedDict()
 simhashes = {} # use for detecting duplicate pages
+not_included = []
 
 # -------------------------
 # CREATE PARTIAL INDEXES!
@@ -44,6 +45,7 @@ while file_num < len(json_files):
     while file_num < len(json_files):
         print("file Num: ", file_num) # FOR DEBUGGING
 
+
         # check if json file and not a folder
         if re.match(r".*(\.json)",  json_files[file_num]):
             file = z.open(json_files[file_num], mode='r')
@@ -53,6 +55,9 @@ while file_num < len(json_files):
             id = id + 1
             url = data["url"]
             id_urls[id] = url
+            print("doc id: ", id)
+
+            print(url)
 
             # extract info from markup
             ds = documentParser.DocParser(id, data["content"])
@@ -69,12 +74,19 @@ while file_num < len(json_files):
                         stats.add_token(token)
                         partial_index[token] = [] # turn this into a linked list later!!
                     partial_index[token].append(ds.get_posting(token))
+            else:
+                not_included.append(id)
 
             file.close()
 
         file_num += 1
         if len(partial_index) > 200000: # about 25 MB right now
             break
+
+    filename = "notIncluded.txt"
+    with open(filename, 'w') as dumped:
+        json.dump(not_included, dumped, indent = 4)
+    dumped.close()
 
 
     filename = "partial_indexes/pIndex" + str(index_num) + ".txt"
@@ -110,6 +122,8 @@ im.create_idf_dict("index", stats.get_num_docs())
 
 # add tfidfs
 im.add_tf_idf("index", stats.get_num_docs())
+
+print("DOC IDS NOT INCLUDED: ", not_included)
 
 
 

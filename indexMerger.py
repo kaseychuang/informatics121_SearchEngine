@@ -7,15 +7,18 @@ import math
 
 
 def merge_partials(folder):
+    print("calling")
     # open the folder, like we did before
     for filename in os.listdir(folder):
         # open the file
-        if filename[0:5] == "pIndex":
+        if re.match("^.*\.txt$", filename):
+            print("FILENAME: ", filename)
             path = folder + "/" + filename
             file = open(path, 'r')
             print(filename)
-
             p_index = json.load(file)
+
+            print("hi")
 
             write_pindex_to_disk(p_index, "index")
 
@@ -23,9 +26,12 @@ def merge_partials(folder):
 
             file.close()
 
+    print("ending partisl")
+
 
 # assume that the partial index is already open and loaded as a dictionary
 def write_pindex_to_disk(pIndex, indexFolderPath):
+    print("calling write to one index")
     # open index folder path file
     pathname = indexFolderPath + "/a.txt"
     f = open(pathname, mode = 'r+')    # not sure if this is read or write
@@ -80,26 +86,27 @@ def add_tf_idf(index_folder, collection_size):
     for filename in os.listdir(index_folder):
         # check if it's a txt file
         # open the file
-        path = index_folder + "/" + filename
+        if re.match("^.*\.txt$", filename):
+            path = index_folder + "/" + filename
 
-        print(path)
-        file = open(path, 'r+')
-        print(filename)
+            print(path)
+            file = open(path, 'r+')
+            print(filename)
 
-        index = json.load(file)
+            index = json.load(file)
 
-        for term, postings in index.items(): # this gets list of postings
-            df = len(index[term]) # might have to change this if we change to a set
-            idf = math.log(collection_size / df, 10)
-            print("Term: ", term)
+            for term, postings in index.items(): # this gets list of postings
+                df = len(index[term]) # might have to change this if we change to a set
+                idf = math.log(collection_size / df, 10)
+                print("Term: ", term)
 
-            for p in postings:
-                print(p)
-                tf = 1 + math.log(p["freq"], 10)
-                p["tf-idf"] = tf * idf
+                for p in postings:
+                    print(p)
+                    tf = 1 + math.log(p["freq"], 10)
+                    p["tf-idf"] = tf * idf
 
-        write_and_close(file, index)
-        index.clear()
+            write_and_close(file, index)
+            index.clear()
 
 
 # creates file to store idf dictionary
@@ -127,45 +134,86 @@ def create_idf_dict(index_folder, collection_size):
     idf_file.close()
 
 
-# returns a dictionary that indexes the index
-# TEST THIS ON A SMALL SAMPLE!
-def create_indexed_index(index_folder):
-    index_dict = dict()
-
-    # have to open all the partial indexes one by one
-    # DO THIS AT THE SAME TIME AS WHEN I MAKE THE IDF DICTIONARY!!! TO MAKE MORE EFFICIENT??
-    for filename in os.listdir(index_folder):
-        index_dict[filename] = dict()
-
-        if re.match("^.*\.txt$", filename):
-            path = index_folder + "/" + filename
-            print(path)
-            file = open(path, 'r+')
-            print(filename)
-            index = json.load(file)
-            position = 0
-
-            for term, postings in index.items():
-                num_postings = len(postings)
-                # calculate offsets!
-
-                # DO LATER!
-
-    return index_dict
-
-
-
-
-    # key = index file name
-    # value = dictionary<term, character num>
-
-    # keep track of what character num we're on! (resets each file)
-
-
-
-
-    return True
-
+# # returns a dictionary that indexes the index
+# # TEST THIS ON A SMALL SAMPLE!
+# def create_indexed_index(index_folder):
+#     index_dict = dict()
+#
+#     filename = "indexed_index.txt"
+#     file = open(filename, 'w')
+#
+#     # have to open all the partial indexes one by one
+#     # DO THIS AT THE SAME TIME AS WHEN I MAKE THE IDF DICTIONARY!!! TO MAKE MORE EFFICIENT??
+#     for filename in os.listdir(index_folder):
+#         index_dict[filename] = dict()
+#
+#         if re.match("^.*\.txt$", filename):
+#             path = index_folder + "/" + filename
+#             #print(path)
+#             file = open(path, 'r+')
+#             #print(filename)
+#             for term, postings in index.items():
+#                 num_lines = 0
+#                 (pos, num) += get_term_offset_and_lines(term, postings)
+#                 position += pos
+#                 num_lines += num
+#                 # index it
+#                 index_dict[filename][term] = (position, num_lines)
+#
+#     json.dump(index_dict, file)
+#     file.close()
+#
+# def get_term_offset_and_lines(term, postings):
+#     offset = 0
+#     num_lines = 0
+#     # calc offset for term
+#
+#     # calc offset for postings
+#     for posting in postings:
+#         offset, num_lines += get_posting_offset_and_numlines(posting)
+#
+#     # calc any last offsets
+#
+#     return (offset, num_lines)
+#
+#
+# # returns offset for this posting
+# def get_posting_offset_and_numlines(posting):
+#     #CALCULATE NUM LI NES!!!
+#     num_lines = 0
+#     # start with characters we know will always be there
+#     offset = 0
+#
+#     # id offset
+#     offset += 7 # check if this is right
+#     id = posting["id"]
+#     offset += len(str(id))
+#
+#     # freq offset
+#     offset += 9
+#     freq = posting["freq"]
+#     offset += len(str(freq))
+#
+#     # html offset (DOUBLE CHECK THIS)
+#     offset += 9
+#     html = posting["html"]
+#     offset += sum(len(e) for e in html) # element names
+#     offset += 2 * len(html) # add "" for each html element
+#     if len(html) > 1: # account for commas
+#         offset += len(html) - 1
+#
+#     # tf-idf offset
+#     offset += 11
+#     tfidf = posting["tf-idf"]
+#     offset+= len(str(tfidf))
+#
+#     # add ending offsets?
+#
+#     # CALCULATE NUM LINES!!!!
+#
+#     return (offset, num_lines)
+#
+#
 
 
 

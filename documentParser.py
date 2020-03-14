@@ -34,9 +34,10 @@ class DocParser:
 
         self.html_dict = self.get_html_elements()
 
+
         # calculate simhash
         self.simhash = Simhash(self.text).value
-        print("SIMHASH: ", self.simhash)
+        #print("SIMHASH: ", self.simhash)
 
         # remove duplicate tokens
         self.tokens = set(self.tokens)
@@ -64,7 +65,7 @@ class DocParser:
     # value = list of tags ['a', 'b', 'h1' etc]
     def get_html_elements(self):
         # put all terms inside with an empty list
-        html_dict = {term:[] for term in self.tokens}
+        html_dict = {term:set() for term in self.tokens}
 
         # use Beautiful soup to get all the tags
         titles = self.soup.find_all("title")
@@ -74,31 +75,45 @@ class DocParser:
         bolds = self.soup.find_all(["bold", "strong"])
 
         # get words inside those tags
-        for title in titles:
-            words = tokenizer.get_tokens(title.findAll(text=True)[0])
-            for word in words:
-                html_dict[word].append("t")
+        try:
+            if titles:
+                for title in titles:
+                    words = tokenizer.get_tokens(title.findAll(text=True)[0])
+                    for word in words:
+                        html_dict[word].add("t")
 
-        for h1 in h1s:
-            words = tokenizer.get_tokens(h1.findAll(text=True)[0])
-            for word in words:
-                html_dict[word].append("h1")
+            for h1 in h1s:
+                text = h1.findAll(text=True)
+                if text:
+                    words = tokenizer.get_tokens(text[0])
+                    for word in words:
+                        html_dict[word].add("h1")
 
-        for h2 in h2s:
-            words = tokenizer.get_tokens(h2.findAll(text=True)[0])
-            for word in words:
-                html_dict[word].append("h2")
+            for h2 in h2s:
+                text = h2.findAll(text=True)
+                if text:
+                    words = tokenizer.get_tokens(text[0])
+                    for word in words:
+                        html_dict[word].add("h2")
 
-        for h3 in h3s:
-            words = tokenizer.get_tokens(h3.findAll(text=True)[0])
-            for word in words:
-                html_dict[word].append("h3")
+            for h3 in h3s:
+                text = h3.findAll(text=True)
+                if text:
+                    words = tokenizer.get_tokens(text[0])
+                    for word in words:
+                        html_dict[word].add("h3")
 
-        for bold in bolds:
-            words = tokenizer.get_tokens(bold.findAll(text=True)[0])
-            for word in words:
-                html_dict[word].append("b")
+            for bold in bolds:
+                text = bold.findAll(text=True)
+                if text:
+                    words = tokenizer.get_tokens(text[0])
+                    for word in words:
+                        html_dict[word].add("b")
 
+        except:
+            print("Something went wrong, but we will continue indexing")
+
+        #print(html_dict)
         return html_dict
 
 
@@ -107,7 +122,7 @@ class DocParser:
         posting = dict()
         posting["id"] = self.id
         posting["freq"] = self.get_word_freq(word)
-        posting["html"] = self.html_dict[word]
+        posting["html"] = list(self.html_dict[word])
         posting["tf-idf"] = 0; # will be calculated later
 
         return posting

@@ -29,16 +29,19 @@ def get_scores(query_term_list, doc_dict):
     # for docId, info in doc_dict.items():
     #     scores[docId] += get_doc_tfidf(info, idf_dict)
 
-    # cosine similarity?
+    # cosine similarity
     q_vector = get_query_vector(query_term_list, idf_dict)
     print(q_vector)
     for docId, info in doc_dict.items():
         scores[docId] = get_cosine_similarity(q_vector, docId, doc_dict, idf_dict)
-        #print(scores[docId])
-    # COULD IGNORE LOW TFIDF QUERIES?? DUNNO IF THAT WOULD MAKE IT FASTER
-    # MIGHT MAKE IT MORE ACCURATE THOUGH?
+
+        # calc html elements
+        for term, posting in info:
+            print("POSTING: ", posting)
+            scores[docId] += get_html_score(posting)
 
 
+    # html elements
 
     # authority?
 
@@ -52,6 +55,32 @@ def get_scores(query_term_list, doc_dict):
     #print(scores)
 
     return scores
+
+
+# gets score based on if it's bolded, linked etc.
+# gets score for one document
+def get_html_score(posting):
+    score = 0
+    html_list = posting["html"]
+    if len(html_list) != 0:
+        if "h1" in html_list:
+            score += 3
+        if "h2" in html_list:
+            score += 2
+        if "h3" in html_list:
+            score += 1
+        if "b" in html_list:
+            score += 1
+        if "t" in html_list:
+            score += 5
+
+    # get number between 0 and 1
+    #print(score)
+    if score != 0:
+        score = score/12
+    return score
+
+
 
 
 # gets the cosine similarity of a query doc pair
@@ -120,7 +149,3 @@ def get_doc_tfidf(term_posting_list, idf_dict):
     return tfidf
 
 
-# gets score based on if it's bolded, linked etc.
-def get_doc_analysis_score(doc_id):
-
-    return 0
